@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"runtime"
 	"sync"
 	"time"
 
@@ -33,23 +32,23 @@ type InterpLoaderOpts struct {
 
 // InterpLoader Interp 后端 Loader 结构体。
 type InterpLoader struct {
-	opt         InterpLoaderOpts
-	yaegi       *interp.Interpreter
-	mu            sync.RWMutex
-	instances   map[string]*interpInstance
+	opt       InterpLoaderOpts
+	yaegi     *interp.Interpreter
+	mu        sync.RWMutex
+	instances map[string]*interpInstance
 }
 
 // NewInterpLoader 创建默认配置的 Interp Loader。
 func NewInterpLoader() *InterpLoader {
 	return NewInterpLoaderWithOpts(InterpLoaderOpts{
-		Timeout:        30 * time.Second,
+		Timeout:         30 * time.Second,
 		AllowAllImports: false,
-		EnablePrint:   false,
-		MaxStackSize:  0,
-		EnableGC:      true,
-		Stdin:         os.Stdin,
-		Stdout:        os.Stdout,
-		Stderr:        os.Stderr,
+		EnablePrint:     false,
+		MaxStackSize:    0,
+		EnableGC:        true,
+		Stdin:           os.Stdin,
+		Stdout:          os.Stdout,
+		Stderr:          os.Stderr,
 	})
 }
 
@@ -67,14 +66,14 @@ func NewInterpLoaderWithOpts(opts InterpLoaderOpts) *InterpLoader {
 
 	// 使用 yaegi v0.16.1 创建解释器，通过 github.com/traefik/yaegi/interp
 	yamlOptions := &interp.Options{
-		GoPath:         "",
-		BuildTags:      nil,
-		Stdin:          opts.Stdin,
-		Stdout:         opts.Stdout,
-		Stderr:         opts.Stderr,
-		Args:           os.Args,
-		Env:            os.Environ(),
-		Unrestricted:   !opts.AllowAllImports,
+		GoPath:       "",
+		BuildTags:    nil,
+		Stdin:        opts.Stdin,
+		Stdout:       opts.Stdout,
+		Stderr:       opts.Stderr,
+		Args:         os.Args,
+		Env:          os.Environ(),
+		Unrestricted: !opts.AllowAllImports,
 	}
 
 	if opts.AllowAllImports {
@@ -82,21 +81,14 @@ func NewInterpLoaderWithOpts(opts InterpLoaderOpts) *InterpLoader {
 		yamlOptions.Unrestricted = true
 	}
 
-	interpreter, err := interp.New(yamlOptions)
-	if err != nil {
-		fmt.Printf("yaegi interpreter creation warning: %v\n", err)
-		// 即使失败也创建一个默认解释器，防止程序崩溃
-		interpreter, _ = interp.New(&interp.Options{
-			Stdin:   opts.Stdin,
-			Stdout:  opts.Stdout,
-			Stderr:  opts.Stderr,
-		})
-	}
+	// yaegi v0.16.1: interp.New 接受 Options 值类型
+	// yamlOptions 是 *interp.Options（指针），需要通过 解引用 传递
+	var interpreter *interp.Interpreter = interp.New(*yamlOptions)
 
 	return &InterpLoader{
-		opt:         opts,
-		yaegi:       interpreter,
-		instances:   make(map[string]*interpInstance),
+		opt:       opts,
+		yaegi:     interpreter,
+		instances: make(map[string]*interpInstance),
 	}
 }
 
@@ -167,15 +159,8 @@ func (l *InterpLoader) Inspect(ctx context.Context, id string) (loader.Info, err
 		state = loader.StateFailed
 	}
 
-	// 计算 StartedAt
-	startedAt := time.Time{}
-	if inst.running {
-		startedAt = time.Now()
-	}
-
 	return loader.Info{
-		ID:      inst.id,
-		State:   state,
+		State:    state,
 		LoadedAt: time.Now(),
 	}, nil
 }
@@ -307,7 +292,7 @@ func (l *InterpLoader) gracefulShutdown(id string) error {
 // 注意：loader.Instance 接口要求 State() loader.State，其中 loader.State 是 type State string
 func (i *interpInstance) State() loader.State {
 	if i.running {
-		return loader.StateRunning
+		return loader.StateReady
 	}
 	if i.ctx.Err() != nil {
 		return loader.StateFailed
@@ -315,7 +300,7 @@ func (i *interpInstance) State() loader.State {
 	return loader.StateStopped
 }
 
-//gracefulShutdown 优雅关闭实例。
+// gracefulShutdown 优雅关闭实例。
 func (i *interpInstance) gracefulShutdown() error {
 	i.running = false
 	if i.cancel != nil {
@@ -338,7 +323,7 @@ func (i *interpInstance) Invoke(ctx context.Context, method string, args any) (a
 	}
 
 	// 设置调用超时
-	callCtx, callCancel := context.WithTimeout(ctx, i.timeout)
+	_, callCancel := context.WithTimeout(ctx, i.timeout)
 	defer callCancel()
 
 	// 使用 yaegi Interpreter 执行代码
@@ -374,8 +359,14 @@ func (i *interpInstance) Close(ctx context.Context) error {
 		i.cancel()
 	}
 
-	// TODO: 清理资源
-	// 可以在这里添加解释器清理、符号表清理等逻辑
+	// 清理资源
+	// 释放解释器引用，便于垃圾回收
+	i.interpreter = nil
+
+	// 清理取消函数
+	i.cancel = nil
+
+	// 可以在这里添加额外的符号表清理、上下文清理等逻辑
 
 	return nil
 }

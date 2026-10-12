@@ -1,7 +1,6 @@
-// +build ignore
-
 // Package notifier 是一个 builtin 示例插件，演示契约实现与后台任务规范。
 // 该插件通过 init() + 注册表编译进主程序（约束 B3/B4）。
+//
 //go:generate go run ./cmd/gen
 //plugin:export name=example-notifier api=1.0 backend=builtin extension=notifier
 package notifier
