@@ -13,6 +13,39 @@ Millipede 是一个 Go 插件化框架，旨在复刻 Java 插件体系的核心
 
 主路径 = `builtin`（编译期注册） + `proc`（子进程 + RPC）；`wasm` 作为不可信代码/需可卸载场景的增强路径。
 
+## Plugin System
+
+### Dynamic Plugin Loading
+Millipede supports dynamic plugin loading through the `plugins` folder. The framework automatically discovers and loads Go plugin files that contain `//plugin:export` annotations.
+
+**How it works:**
+- Scans `plugins` directory (or custom path) for `.go` files
+- Parses `//plugin:export name="myplugin"` annotations
+- If no explicit name, uses filename (without `.go` suffix) as plugin name
+- Supports recursive subdirectory scanning
+
+**Usage:**
+```go
+// Auto-discovery (called in init)
+_ = NewPluginLoader().DiscoverAndLoad()
+
+// Or customize plugin directory
+NewPluginLoader(func(o *plugin.PluginLoaderOptions) {
+    o.PluginDir = "my-custom-plugins"
+})
+```
+
+### Plugin Annotation Format
+```go
+// plugin:export name="myplugin" description="your description"
+// 或不带 name，使用文件名作为插件名
+```
+
+**Core Paths:**
+- `builtin`：编译期注册
+- `proc`：子进程 + RPC
+- `wasm`：动态加载（通过 plugins 文件夹）
+
 ## Quick Start
 
 ### Compile Verification
@@ -69,6 +102,39 @@ Millipede is a Go plugin framework designed to replicate the core capabilities o
 **Core Design**: Go is AOT statically linked, a single process has only one global type table, and there is no runtime entry for loading new types. Isolation capability must be obtained through process/WASM/interpreter.
 
 Main path = `builtin` (compile-time registration) + `proc` (subprocess + RPC); `wasm` as an enhanced path for untrusted code / scenarios requiring unloading.
+
+## Plugin System
+
+### Dynamic Plugin Loading
+Millipede supports dynamic plugin loading through the `plugins` folder. The framework automatically discovers and loads Go plugin files that contain `//plugin:export` annotations.
+
+**How it works:**
+- Scans `plugins` directory (or custom path) for `.go` files
+- Parses `//plugin:export name="myplugin"` annotations
+- If no explicit name, uses filename (without `.go` suffix) as plugin name
+- Supports recursive subdirectory scanning
+
+**Usage:**
+```go
+// Auto-discovery (called in init)
+_ = NewPluginLoader().DiscoverAndLoad()
+
+// Or customize plugin directory
+NewPluginLoader(func(o *plugin.PluginLoaderOptions) {
+    o.PluginDir = "my-custom-plugins"
+})
+```
+
+### Plugin Annotation Format
+```go
+// plugin:export name="myplugin" description="your description"
+// 或不带 name，使用文件名作为插件名
+```
+
+**Core Paths:**
+- `builtin`：编译期注册
+- `proc`：子进程 + RPC
+- `wasm`：动态加载（通过 plugins 文件夹）
 
 ## Quick Start
 
