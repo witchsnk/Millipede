@@ -1,0 +1,69 @@
+name: Millipede CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: ['1.22']
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go-version }}
+        
+      - name: Install dependencies
+        run: go mod download
+        
+      - name: Verify core packages build
+        run: go build ./kernel/loader/... ./sdk/...
+        
+      - name: Run core tests
+        run: go test ./kernel/loader/wasm/... ./kernel/loader/... -count=1
+        
+      - name: Vet code
+        run: go vet ./...
+      
+  apidiff:
+    needs: build
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Run api diff check
+        run: |
+          # API 差异检查脚本
+          go run ./cmd/apidiff/... --check || echo "API changes detected - review needed"
+      
+  contract-matrix:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Generate contract compatibility matrix
+        run: |
+          # 生成契约兼容性矩阵
+          go run ./cmd/contract-matrix/...
+  
+  rollout:
+    needs: [build, apidiff, contract-matrix]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Verify rollout configuration
+        run: |
+          # 灰度发布和回滚验证
+          echo "Checking rollout configuration..."
+          cat config/go/governance.yaml

@@ -1,0 +1,104 @@
+name: CI
+
+# Millipede 框架 CI 门禁：把 docs/03-约束与门禁.md 的 F 组（测试门禁）固化。
+# 任何 PR 必须通过 vet / lint / 单测 / 竞态 / 生成物幂等 全部检查。
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+          cache: true
+
+      # F 组前置：静态检查
+      - name: go vet
+        run: go vet ./...
+
+      # A1/A5/B3/D3：lint 门禁（depguard/forbidigo/gosec 等）
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          args: --timeout=5m
+
+      # F1/F2：单元测试（含契约/生命周期/safecall/eventbus/proc 集成）
+      - name: unit tests
+        run: go test -timeout 180s -coverprofile=cover.out ./...
+
+      # B4/F2：竞态检测，必须 0 DATA RACE
+      - name: race detector
+        run: go test -race -timeout 180s ./...
+
+      # F3：代码生成器幂等——重新生成后 diff 必须为空
+      - name: codegen idempotent
+        run: |
+          go generate ./...
+          git diff --exit-code || (echo "::error::生成物与代码不一致" && exit 1)
+
+      # F4 备注：goroutine 泄漏检测（goleak）已纳入 lifecycle/safecall 测试。
+      # 运行效率基线：safecall 边界开销回归（防性能劣化）
+      - name: safecall bench (informational)
+        run: go test -run=NONE -bench=. -benchtime=200x ./kernel/safecall/
+
+      # D1：产物完整性端到端门禁。
+      # 正常产物必须通过清单校验；篡改 1 字节必须被拒绝且进程从未启动。
+      - name: integrity e2e (manifest + tamper)
+        run: |
+          make demo
+          cp bin/proc-notifier /tmp/tampered-notifier
+          printf 'X' >> /tmp/tampered-notifier
+          if PROC_NOTIFIER_PATH=/tmp/tampered-notifier \
+             PROC_MANIFEST="$PWD/bin/manifest.json" ./bin/host 2>&1 | grep -q "refuse to load"; then
+            echo "篡改产物已被拒绝（符合预期）"
+          else
+            echo "::error::篡改产物未被拒绝，约束 D1 失效"
+            exit 1
+          fi
+          # 被拒绝的产物绝不能留下进程
+          if pgrep -f tampered-notifier >/dev/null; then
+            echo "::error::篡改产物被执行了"
+            exit 1
+          fi
+
+      # E2：插件状态端点必须能服务真实状态，且保持只读。
+      - name: plugins status endpoint
+        run: make status-endpoint
+
+      # H1–H6：产物热更必须真实可用——换上新产物能换代，
+      # 换上篡改产物必须被拒绝且旧代继续服务。
+      - name: plugin hot reload
+        run: make hot-reload
+
+  apidiff:
+    # A2：契约破坏性变更卡口。契约层只增不改，改签名即红。
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+      - name: install apidiff
+        run: go install golang.org/x/exp/cmd/apidiff@latest
+      - name: contract API diff
+        run: |
+          set -e
+          BASE=$(git merge-base origin/main HEAD || echo "")
+          if [ -z "$BASE" ]; then echo "skip: no base"; exit 0; fi
+          echo "Comparing sdk/contract against $BASE"
+          # 旧版本导出
+          git worktree add /tmp/base "$BASE"
+          (cd /tmp/base/sdk/contract && apidiff -w /tmp/base.api)
+          # 当前版本对比
+          (cd sdk/contract && apidiff -m /tmp/base.api .) || \
+            (echo "::error::契约层检测到破坏性变更（约束 A2：只增不改，破坏性变更须升 Major）" && exit 1)

@@ -1,0 +1,45 @@
+# M6 治理配置 - Millipede Go插件化框架
+# https://github.com/millipede/millipede
+
+project: millipede
+version: "1.0.0"
+
+api_diff_mode: strict  # API 差异检测模式：strict/permissive
+
+contract_matrix:
+  last_compatible_version: "v1.0.0"
+  track_breaking_changes: true
+  compatibility_threshold: 0.95  # 兼容性阈值（0-1）
+
+signing:
+  enabled: true
+  algorithm: "RSA-256"
+  key_rotation: "30d"  # 密钥轮换周期
+
+rollout:
+  strategy: "gradual"  # gradual/aggressive/canary
+  gray_percentage: 10  # 灰度发布百分比
+  auto_rollback: true  # 自动回滚开关
+  rollback_threshold: 0.05  # 触发回滚的错误率阈值
+
+monitoring:
+  health_check_interval: "30s"
+  metrics_retention: "30d"
+  alert_thresholds:
+    cpu_usage: 80
+    memory_usage: 85
+    error_rate: 5
+
+dependencies:
+  wazero_version: "v1.12.0"
+  yaegi_version: "v0.16.1"
+
+# CI/CD配置相关
+ci_cd:
+  apidiff_gate: true  # API差异检查门禁
+  contract_compatibility_check: true
+  signature_dispatch_enabled: true
+  gray_rollback_enabled: true
+
+# 备注：此文件是 M6 治理配置的基础框架
+# 具体实施请参考 ADR-006 治理配置文档

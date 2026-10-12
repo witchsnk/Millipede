@@ -1,0 +1,9 @@
+# 本地构建与缓存
+.gocache/
+.gomodcache/
+bin/
+cover.out
+
+# 发布签名密钥（绝不入库）
+release.key
+*.key

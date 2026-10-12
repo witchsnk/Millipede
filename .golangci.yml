@@ -1,0 +1,77 @@
+# Millipede 框架 lint 配置：把 docs/03-约束与门禁.md 中的坑点固化为可执行检查。
+# 运行：golangci-lint run ./...
+run:
+  timeout: 5m
+  tests: true
+
+linters:
+  enable:
+    - govet          # 标准静态检查
+    - staticcheck    # SA 系列
+    - errcheck       # 未处理错误（防止静默吞错，约束 B5）
+    - gosimple       # 简化建议
+    - ineffassign    # 无效赋值
+    - unused         # 未使用代码
+    - gosec          # 安全扫描（unsafe/注入等，约束 D3）
+    - bodyclose      # HTTP body 关闭
+    - noctx          # HTTP 请求必须带 ctx（约束 A3）
+    - contextcheck   # ctx 传递一致性
+    - revive         # 代码风格
+    - unconvert
+    - misspell
+    - nilerr         # 返回 nil 但忽略 err
+    - depguard       # import 白/黑名单（约束 A1/A5）
+    - forbidigo      # 禁用特定标识符（os.Exit 等，约束 B3）
+    - gocritic
+    - copyloopvar
+
+linters-settings:
+  depguard:
+    rules:
+      # 约束 A1：插件禁止依赖主程序内部包。
+      plugins-no-internal:
+        files:
+          - "plugins/**/*.go"
+        deny:
+          - pkg: "github.com/millipede/millipede/cmd"
+            desc: "插件禁止依赖宿主 cmd 内部包（约束 A1）"
+      # 契约层自举保护：sdk/contract 不得依赖任何内核包。
+      contract-purity:
+        files:
+          - "sdk/contract/**/*.go"
+        deny:
+          - pkg: "github.com/millipede/millipede/kernel"
+            desc: "契约层禁止依赖内核，保持独立 module 纯净（约束 A1）"
+  forbidigo:
+    forbid:
+      # 约束 B3：插件/内核业务代码禁止 os.Exit（仅允许 cmd/host 顶层）。
+      - pattern: '^os\.Exit$'
+        msg: "禁止 os.Exit：插件应返回 error 由框架处理（约束 B3）"
+      # 约束 B3：禁止 runtime.Goexit 逃逸。
+      - pattern: '^runtime\.Goexit$'
+        msg: "禁止 runtime.Goexit：会破坏 defer 与生命周期回收（约束 B3）"
+  gosec:
+    excludes:
+      # 子进程拉起是 proc 后端的正常能力，非误报点单独评审。
+      - G204
+
+issues:
+  exclude-rules:
+    # cmd 顶层允许 os.Exit（进程入口）。
+    - path: "cmd/host/main.go"
+      linters:
+        - forbidigo
+    # 测试文件放宽 errcheck（如 fmt.Fprintf 到 stderr）。
+    - path: "_test\\.go"
+      linters:
+        - errcheck
+        - gosec
+    # proc 插件侧 stderr 日志是协议要求。
+    - path: "plugins/proc-notifier/main.go"
+      linters:
+        - errcheck
+    - path: "kernel/loader/proc/testplugin/main.go"
+      linters:
+        - errcheck
+  max-issues-per-linter: 0
+  max-same-issues: 0
