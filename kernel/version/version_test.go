@@ -3,7 +3,7 @@ package version
 import (
 	"testing"
 
-	"github.com/millipede/millipede/sdk/contract"
+	"github.com/witchsnk/millipede/sdk/contract"
 )
 
 func v(maj, min int) contract.APIVersion { return contract.APIVersion{Major: maj, Minor: min} }

@@ -21,7 +21,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/millipede/millipede/kernel/loader"
+	"github.com/witchsnk/millipede/kernel/loader"
 )
 
 // Registry 聚合插件状态。

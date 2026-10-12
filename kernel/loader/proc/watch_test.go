@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/millipede/millipede/kernel/integrity"
-	"github.com/millipede/millipede/kernel/loader"
+	"github.com/witchsnk/millipede/kernel/integrity"
+	"github.com/witchsnk/millipede/kernel/loader"
 )
 
 func TestWatcherDetectsContentChange(t *testing.T) {

@@ -7,7 +7,7 @@ package version
 import (
 	"fmt"
 
-	"github.com/millipede/millipede/sdk/contract"
+	"github.com/witchsnk/millipede/sdk/contract"
 )
 
 // Range 表示宿主对某扩展点支持的版本区间（含端点）。

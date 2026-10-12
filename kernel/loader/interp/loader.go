@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/millipede/millipede/kernel/loader"
 	"github.com/traefik/yaegi/interp"
+	"github.com/witchsnk/millipede/kernel/loader"
 )
 
 // InterpLoaderOpts Interp Loader 配置选项。
@@ -73,12 +73,7 @@ func NewInterpLoaderWithOpts(opts InterpLoaderOpts) *InterpLoader {
 		Stderr:       opts.Stderr,
 		Args:         os.Args,
 		Env:          os.Environ(),
-		Unrestricted: !opts.AllowAllImports,
-	}
-
-	if opts.AllowAllImports {
-		// 允许所有导入时取消限制
-		yamlOptions.Unrestricted = true
+		Unrestricted: opts.AllowAllImports,
 	}
 
 	// yaegi v0.16.1: interp.New 接受 Options 值类型
@@ -103,9 +98,11 @@ func (l *InterpLoader) Load(ctx context.Context, d loader.Descriptor) (loader.In
 	defer l.mu.Unlock()
 
 	// 创建新实例
+	ictx, cancel := context.WithCancel(ctx)
 	inst := &interpInstance{
 		id:          d.ID,
-		ctx:         ctx,
+		ctx:         ictx,
+		cancel:      cancel,
 		interpreter: l.yaegi,
 		running:     true,
 		timeout:     l.opt.Timeout,

@@ -14,11 +14,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/millipede/millipede/kernel/loader"
-	"github.com/millipede/millipede/kernel/loader/proc/protocol"
-	"github.com/millipede/millipede/kernel/quota"
-	"github.com/millipede/millipede/kernel/safecall"
-	"github.com/millipede/millipede/sdk/contract"
+	"github.com/witchsnk/millipede/kernel/loader"
+	"github.com/witchsnk/millipede/kernel/loader/proc/protocol"
+	"github.com/witchsnk/millipede/kernel/quota"
+	"github.com/witchsnk/millipede/kernel/safecall"
+	"github.com/witchsnk/millipede/sdk/contract"
 )
 
 // procInstance 是一个子进程插件实例。

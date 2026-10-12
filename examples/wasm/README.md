@@ -118,9 +118,9 @@ package main
 import (
     "context"
     "fmt"
-    "github.com/millipede/millipede/examples/wasm/temperature"
-    "github.com/millipede/millipede/examples/wasm/humidity"
-    "github.com/millipede/millipede/kernel/loader"
+    "github.com/witchsnk/millipede/examples/wasm/temperature"
+    "github.com/witchsnk/millipede/examples/wasm/humidity"
+    "github.com/witchsnk/millipede/kernel/loader"
 )
 
 // 1. 创建插件实例
@@ -148,9 +148,9 @@ humidPlugin.Close(context.Background())
 ```go
 import (
     "context"
-    "github.com/millipede/millipede/kernel/loader"
-    "github.com/millipede/millipede/examples/wasm/temperature"
-    "github.com/millipede/millipede/examples/wasm/humidity"
+    "github.com/witchsnk/millipede/kernel/loader"
+    "github.com/witchsnk/millipede/examples/wasm/temperature"
+    "github.com/witchsnk/millipede/examples/wasm/humidity"
 )
 
 func main() {
@@ -224,7 +224,7 @@ cd ../../.. && go build ./kernel/loader/wasm/...
 ### 插件规范
 - 每个插件文件顶部必须包含 `//plugin:export` 注解
 - 必须实现 `contract.Plugin` 接口
-- 必须导入 `github.com/millipede/millipede/kernel/loader` 获取 `Base` 结构体
+- 必须导入 `github.com/witchsnk/millipede/kernel/loader` 获取 `Base` 结构体
 - 推荐使用 `go:generate go run ./cmd/gen` 自动化代码生成
 
 ### 性能考量

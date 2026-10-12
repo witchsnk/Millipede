@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/millipede/millipede/sdk/contract"
+	"github.com/witchsnk/millipede/sdk/contract"
 )
 
 // ErrPlatformUnsupported 表示当前平台无法设置进程级 rlimit。

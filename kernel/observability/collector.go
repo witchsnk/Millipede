@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/millipede/millipede/kernel/loader"
-	"github.com/millipede/millipede/kernel/safecall"
+	"github.com/witchsnk/millipede/kernel/loader"
+	"github.com/witchsnk/millipede/kernel/safecall"
 )
 
 // Source 是一个可被端点采集的后端加载器。

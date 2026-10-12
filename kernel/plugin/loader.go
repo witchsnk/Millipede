@@ -20,27 +20,24 @@ type PluginLoader struct {
 	pluginDir     string
 	loadedPlugins map[string]any
 	pluginInfos   map[string]PluginInfo
-	mu             sync.RWMutex
+	mu            sync.RWMutex
 }
 
 // NewPluginLoader 创建新的插件加载器
 func NewPluginLoader(options ...func(*PluginLoaderOptions)) *PluginLoader {
-	dir := "plugins"
-	opts := &PluginLoaderOptions{}
+	opts := &PluginLoaderOptions{
+		PluginDir: "plugins",
+	}
 
 	for _, opt := range options {
 		opt(opts)
 	}
 
-	if dir != "" {
-		dir = opts.PluginDir
-	}
-
 	return &PluginLoader{
-		pluginDir:     dir,
+		pluginDir:     opts.PluginDir,
 		loadedPlugins: make(map[string]any),
 		pluginInfos:   make(map[string]PluginInfo),
-		mu:             sync.RWMutex{},
+		mu:            sync.RWMutex{},
 	}
 }
 
@@ -74,6 +71,13 @@ func (pl *PluginLoader) DiscoverAndLoad() error {
 			})
 			if err := subLoader.DiscoverAndLoad(); err != nil {
 				fmt.Printf("Warning: failed to load subdirectory %s: %v\n", entry.Name(), err)
+			} else {
+				for k, v := range subLoader.loadedPlugins {
+					pl.loadedPlugins[k] = v
+				}
+				for k, v := range subLoader.pluginInfos {
+					pl.pluginInfos[k] = v
+				}
 			}
 			continue
 		}
@@ -239,9 +243,4 @@ func (pl *PluginLoader) ListPlugins() []PluginInfo {
 	}
 
 	return result
-}
-
-func init() {
-	// 初始化时自动发现插件（使用临时加载器，不冲突）
-	_ = NewPluginLoader().DiscoverAndLoad()
 }

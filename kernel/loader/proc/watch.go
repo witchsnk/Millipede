@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/millipede/millipede/kernel/integrity"
-	"github.com/millipede/millipede/kernel/loader"
+	"github.com/witchsnk/millipede/kernel/integrity"
+	"github.com/witchsnk/millipede/kernel/loader"
 )
 
 // WatchOptions 控制产物监听行为。

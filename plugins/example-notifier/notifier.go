@@ -1,7 +1,7 @@
 // Package notifier 是一个 builtin 示例插件，演示契约实现与后台任务规范。
 // 该插件通过 init() + 注册表编译进主程序（约束 B3/B4）。
 //
-//go:generate go run ./cmd/gen
+//go:generate go run github.com/witchsnk/millipede/cmd/gen
 //plugin:export name=example-notifier api=1.0 backend=builtin extension=notifier
 package notifier
 
@@ -10,11 +10,11 @@ import (
 	"fmt"
 	"sync/atomic"
 
-	"github.com/millipede/millipede/kernel/lifecycle"
-	"github.com/millipede/millipede/kernel/loader"
-	"github.com/millipede/millipede/kernel/loader/builtin"
-	"github.com/millipede/millipede/sdk/contract"
-	"github.com/millipede/millipede/sdk/host"
+	"github.com/witchsnk/millipede/kernel/lifecycle"
+	"github.com/witchsnk/millipede/kernel/loader"
+	"github.com/witchsnk/millipede/kernel/loader/builtin"
+	"github.com/witchsnk/millipede/sdk/contract"
+	"github.com/witchsnk/millipede/sdk/host"
 )
 
 // Notifier 实现 contract.Notifier 的示例插件。

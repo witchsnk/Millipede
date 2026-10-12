@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/millipede/millipede/kernel/loader"
+	"github.com/witchsnk/millipede/kernel/loader"
 )
 
 // TestWASMLoaderBuild verifies the WASM loader builds and basic functions work

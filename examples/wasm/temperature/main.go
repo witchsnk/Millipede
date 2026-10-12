@@ -1,5 +1,7 @@
+//go:build ignore
 // +build ignore
-//go:generate go run ./cmd/gen
+
+//go:generate go run github.com/witchsnk/millipede/cmd/gen
 //plugin:export name=temperature-plugin api=1.0 backend=wasm extension=temperature
 
 package main
@@ -10,8 +12,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/millipede/millipede/kernel/loader"
-	"github.com/millipede/millipede/sdk/contract"
+	"github.com/witchsnk/millipede/kernel/loader"
+	"github.com/witchsnk/millipede/sdk/contract"
 )
 
 // TemperaturePlugin 提供温度读数和气候分析功能
@@ -36,13 +38,13 @@ func NewTemperaturePlugin(id string) *TemperaturePlugin {
 func (p *TemperaturePlugin) Init(ctx context.Context) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	
+
 	p.readingsHistory = make([]float64, 0, 100)
 	fmt.Printf("temperature-plugin (ID: %s) initialized\n", p.pluginID)
-	
+
 	// 记录初始读数
 	p.recordReading(p.temperature)
-	
+
 	return nil
 }
 
@@ -50,11 +52,11 @@ func (p *TemperaturePlugin) Init(ctx context.Context) error {
 func (p *TemperaturePlugin) Invoke(ctx context.Context, method string, args any) (any, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	
+
 	switch method {
 	case "readTemperature":
 		return p.temperature, nil
-	
+
 	case "getHistory":
 		if len(p.readingsHistory) == 0 {
 			return []float64{}, nil
@@ -63,7 +65,7 @@ func (p *TemperaturePlugin) Invoke(ctx context.Context, method string, args any)
 		history := make([]float64, len(p.readingsHistory))
 		copy(history, p.readingsHistory)
 		return history, nil
-	
+
 	case "setTemperature":
 		if val, ok := args.(float64); ok {
 			p.temperature = val
@@ -71,10 +73,10 @@ func (p *TemperaturePlugin) Invoke(ctx context.Context, method string, args any)
 			return fmt.Sprintf("temperature set to %.1f", val), nil
 		}
 		return nil, fmt.Errorf("invalid temperature value: %v", args)
-	
+
 	case "getStats":
 		return p.calculateStats(), nil
-	
+
 	default:
 		return nil, fmt.Errorf("unknown method: %s", method)
 	}
@@ -84,20 +86,20 @@ func (p *TemperaturePlugin) Invoke(ctx context.Context, method string, args any)
 func (p *TemperaturePlugin) calculateStats() map[string]interface{} {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	
+
 	if len(p.readingsHistory) == 0 {
 		return map[string]interface{}{
-			"min":      p.temperature,
-			"max":      p.temperature,
-			"average":  p.temperature,
-			"count":    0,
+			"min":     p.temperature,
+			"max":     p.temperature,
+			"average": p.temperature,
+			"count":   0,
 		}
 	}
-	
+
 	min, max := p.readingsHistory[0], p.readingsHistory[0]
 	sum := 0.0
 	count := float64(len(p.readingsHistory))
-	
+
 	for _, r := range p.readingsHistory {
 		if r < min {
 			min = r
@@ -107,9 +109,9 @@ func (p *TemperaturePlugin) calculateStats() map[string]interface{} {
 		}
 		sum += r
 	}
-	
+
 	average := sum / count
-	
+
 	return map[string]interface{}{
 		"min":      min,
 		"max":      max,
@@ -123,9 +125,9 @@ func (p *TemperaturePlugin) calculateStats() map[string]interface{} {
 func (p *TemperaturePlugin) recordReading(temp float64) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	
+
 	p.readingsHistory = append(p.readingsHistory, temp)
-	
+
 	// 保持历史记录在合理范围内 (最多100条)
 	if len(p.readingsHistory) > 100 {
 		p.readingsHistory = p.readingsHistory[len(p.readingsHistory)-100:]
@@ -136,7 +138,7 @@ func (p *TemperaturePlugin) recordReading(temp float64) {
 func (p *TemperaturePlugin) Close(ctx context.Context) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	
+
 	p.readingsHistory = nil
 	fmt.Printf("temperature-plugin (ID: %s) closed\n", p.pluginID)
 	return nil

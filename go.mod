@@ -1,4 +1,4 @@
-module github.com/millipede/millipede
+module github.com/witchsnk/millipede
 
 go 1.26.0
 

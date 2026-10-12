@@ -7,9 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/millipede/millipede/kernel/loader"
 	"github.com/tetratelabs/wazero"
 	"github.com/tetratelabs/wazero/api"
+	"github.com/witchsnk/millipede/kernel/loader"
 )
 
 // WASMLoaderOpts WASM Loader 配置选项。
@@ -82,12 +82,13 @@ func (l *WASMLoader) Load(ctx context.Context, d loader.Descriptor) (loader.Inst
 		return nil, fmt.Errorf("wasm: failed to load module %q: %w", moduleURI, err)
 	}
 
-	// 创建新实例并注册到 wazero Runtime
+	ictx, cancel := context.WithCancel(ctx)
 	inst := &wasmInstance{
 		id:      d.ID,
-		ctx:     ctx,
+		ctx:     ictx,
+		cancel:  cancel,
 		module:  mod,
-		running: false,
+		running: true,
 		steps:   0,
 	}
 

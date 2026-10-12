@@ -11,7 +11,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/millipede/millipede/kernel/loader/proc"
+	"github.com/witchsnk/millipede/kernel/loader/proc"
 )
 
 type handler struct {

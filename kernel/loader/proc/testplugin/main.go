@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/millipede/millipede/kernel/loader/proc"
+	"github.com/witchsnk/millipede/kernel/loader/proc"
 )
 
 type handler struct{}

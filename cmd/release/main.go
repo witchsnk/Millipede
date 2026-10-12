@@ -15,7 +15,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/millipede/millipede/kernel/integrity"
+	"github.com/witchsnk/millipede/kernel/integrity"
 )
 
 type artifactList []string

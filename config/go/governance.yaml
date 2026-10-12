@@ -1,5 +1,5 @@
 # M6 治理配置 - Millipede Go插件化框架
-# https://github.com/millipede/millipede
+# https://github.com/witchsnk/millipede
 
 project: millipede
 version: "1.0.0"

@@ -17,16 +17,17 @@ import (
 	"io"
 	"net/rpc"
 	"os/exec"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"syscall"
 	"time"
 
-	"github.com/millipede/millipede/kernel/integrity"
-	"github.com/millipede/millipede/kernel/loader"
-	"github.com/millipede/millipede/kernel/loader/proc/protocol"
-	"github.com/millipede/millipede/kernel/quota"
-	"github.com/millipede/millipede/kernel/safecall"
+	"github.com/witchsnk/millipede/kernel/integrity"
+	"github.com/witchsnk/millipede/kernel/loader"
+	"github.com/witchsnk/millipede/kernel/loader/proc/protocol"
+	"github.com/witchsnk/millipede/kernel/quota"
+	"github.com/witchsnk/millipede/kernel/safecall"
 )
 
 // Options proc 后端参数。
@@ -389,6 +390,9 @@ func dialWithRetry(ctx context.Context, port int, maxWait time.Duration) (*rpc.C
 		c, err := rpc.Dial("tcp", addr)
 		if err == nil {
 			return c, nil
+		}
+		if strings.Contains(err.Error(), "operation not permitted") {
+			return nil, err
 		}
 		select {
 		case <-ctx.Done():

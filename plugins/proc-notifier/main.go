@@ -1,8 +1,9 @@
 // Command proc-notifier 是一个 proc 后端示例插件：
 // 独立可执行文件，通过 net/rpc 暴露 Invoke/Ping，演示子进程插件形态。
-//go:generate go run ./cmd/gen
-//plugin:export name=proc-notifier api=1.0 backend=proc extension=notifier
 // 约束：日志只走 stderr，绝不往 stdout 写业务日志（握手走 stdout）。
+//
+//go:generate go run github.com/witchsnk/millipede/cmd/gen
+//plugin:export name=proc-notifier api=1.0 backend=proc extension=notifier
 package main
 
 import (
@@ -10,8 +11,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/millipede/millipede/kernel/loader/proc"
-	"github.com/millipede/millipede/sdk/contract"
+	"github.com/witchsnk/millipede/kernel/loader/proc"
+	"github.com/witchsnk/millipede/sdk/contract"
 )
 
 // handler 实现 proc.PluginHandler。

@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/millipede/millipede/kernel/loader"
+	"github.com/witchsnk/millipede/kernel/loader"
 )
 
 // 约束 C4（本次补齐的核心）：插件崩溃后宿主必须真正拉起新进程，

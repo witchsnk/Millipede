@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/millipede/millipede/kernel/plugin"
+	"github.com/witchsnk/millipede/kernel/plugin"
 )
 
 func main() {

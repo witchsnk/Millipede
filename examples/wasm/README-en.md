@@ -118,9 +118,9 @@ package main
 import (
     "context"
     "fmt"
-    "github.com/millipede/millipede/examples/wasm/temperature"
-    "github.com/millipede/millipede/examples/wasm/humidity"
-    "github.com/millipede/millipede/kernel/loader"
+    "github.com/witchsnk/millipede/examples/wasm/temperature"
+    "github.com/witchsnk/millipede/examples/wasm/humidity"
+    "github.com/witchsnk/millipede/kernel/loader"
 )
 
 // 1. Create plugin instances
@@ -148,9 +148,9 @@ humidPlugin.Close(context.Background())
 ```go
 import (
     "context"
-    "github.com/millipede/millipede/kernel/loader"
-    "github.com/millipede/millipede/examples/wasm/temperature"
-    "github.com/millipede/millipede/examples/wasm/humidity"
+    "github.com/witchsnk/millipede/kernel/loader"
+    "github.com/witchsnk/millipede/examples/wasm/temperature"
+    "github.com/witchsnk/millipede/examples/wasm/humidity"
 )
 
 func main() {
@@ -224,7 +224,7 @@ cd ../../.. && go build ./kernel/loader/wasm/...
 ### Plugin Specifications
 - Each plugin file must include `//plugin:export` annotation at the top
 - Must implement `contract.Plugin` interface
-- Must import `github.com/millipede/millipede/kernel/loader` to get `Base` structure
+- Must import `github.com/witchsnk/millipede/kernel/loader` to get `Base` structure
 - Recommended to use `go:generate go run ./cmd/gen` for automated code generation
 
 ### Performance Considerations

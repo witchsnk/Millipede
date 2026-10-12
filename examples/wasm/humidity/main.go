@@ -1,5 +1,7 @@
+//go:build ignore
 // +build ignore
-//go:generate go run ./cmd/gen
+
+//go:generate go run github.com/witchsnk/millipede/cmd/gen
 //plugin:export name=humidity-plugin api=1.0 backend=wasm extension=humidity
 
 package main
@@ -10,25 +12,25 @@ import (
 	"sync"
 	"time"
 
-	"github.com/millipede/millipede/kernel/loader"
-	"github.com/millipede/millipede/sdk/contract"
+	"github.com/witchsnk/millipede/kernel/loader"
+	"github.com/witchsnk/millipede/sdk/contract"
 )
 
 // HumidityPlugin 提供湿度读数和环境监测功能
 type HumidityPlugin struct {
 	loader.Base
-	humidity      float64
-	history       []float64
-	mu              sync.Mutex
-	pluginID        string
+	humidity float64
+	history  []float64
+	mu       sync.Mutex
+	pluginID string
 }
 
 // NewHumidityPlugin 创建新的湿度插件实例
 func NewHumidityPlugin(id string) *HumidityPlugin {
 	return &HumidityPlugin{
-		humidity:      60.0,
-		history:       make([]float64, 0, 100),
-		pluginID:      id,
+		humidity: 60.0,
+		history:  make([]float64, 0, 100),
+		pluginID: id,
 	}
 }
 
@@ -36,13 +38,13 @@ func NewHumidityPlugin(id string) *HumidityPlugin {
 func (p *HumidityPlugin) Init(ctx context.Context) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	
+
 	p.history = make([]float64, 0, 100)
 	fmt.Printf("humidity-plugin (ID: %s) initialized\n", p.pluginID)
-	
+
 	// 记录初始读数
 	p.recordReading(p.humidity)
-	
+
 	return nil
 }
 
@@ -50,11 +52,11 @@ func (p *HumidityPlugin) Init(ctx context.Context) error {
 func (p *HumidityPlugin) Invoke(ctx context.Context, method string, args any) (any, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	
+
 	switch method {
 	case "readHumidity":
 		return p.humidity, nil
-	
+
 	case "setHumidity":
 		if val, ok := args.(float64); ok {
 			p.humidity = val
@@ -62,7 +64,7 @@ func (p *HumidityPlugin) Invoke(ctx context.Context, method string, args any) (a
 			return fmt.Sprintf("humidity set to %.1f%%", val), nil
 		}
 		return nil, fmt.Errorf("invalid humidity value: %v", args)
-	
+
 	case "getHistory":
 		if len(p.history) == 0 {
 			return []float64{}, nil
@@ -70,10 +72,10 @@ func (p *HumidityPlugin) Invoke(ctx context.Context, method string, args any) (a
 		history := make([]float64, len(p.history))
 		copy(history, p.history)
 		return history, nil
-	
+
 	case "getAverage":
 		return p.calculateAverage(), nil
-	
+
 	default:
 		return nil, fmt.Errorf("unknown method: %s", method)
 	}
@@ -83,11 +85,11 @@ func (p *HumidityPlugin) Invoke(ctx context.Context, method string, args any) (a
 func (p *HumidityPlugin) calculateAverage() float64 {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	
+
 	if len(p.history) == 0 {
 		return p.humidity
 	}
-	
+
 	sum := 0.0
 	for _, h := range p.history {
 		sum += h
@@ -99,7 +101,7 @@ func (p *HumidityPlugin) calculateAverage() float64 {
 func (p *HumidityPlugin) recordReading(humid float64) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	
+
 	p.history = append(p.history, humid)
 	if len(p.history) > 100 {
 		p.history = p.history[len(p.history)-100:]
@@ -110,7 +112,7 @@ func (p *HumidityPlugin) recordReading(humid float64) {
 func (p *HumidityPlugin) Close(ctx context.Context) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	
+
 	p.history = nil
 	fmt.Printf("humidity-plugin (ID: %s) closed\n", p.pluginID)
 	return nil

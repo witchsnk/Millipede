@@ -33,14 +33,14 @@ linters-settings:
         files:
           - "plugins/**/*.go"
         deny:
-          - pkg: "github.com/millipede/millipede/cmd"
+          - pkg: "github.com/witchsnk/millipede/cmd"
             desc: "插件禁止依赖宿主 cmd 内部包（约束 A1）"
       # 契约层自举保护：sdk/contract 不得依赖任何内核包。
       contract-purity:
         files:
           - "sdk/contract/**/*.go"
         deny:
-          - pkg: "github.com/millipede/millipede/kernel"
+          - pkg: "github.com/witchsnk/millipede/kernel"
             desc: "契约层禁止依赖内核，保持独立 module 纯净（约束 A1）"
   forbidigo:
     forbid:

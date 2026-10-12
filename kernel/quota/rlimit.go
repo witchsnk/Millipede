@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"syscall"
 
-	"github.com/millipede/millipede/sdk/contract"
+	"github.com/witchsnk/millipede/sdk/contract"
 )
 
 // BuildLimits 返回 RLIMIT_* 常量与值，供子进程在 exec 前调用 setrlimit。

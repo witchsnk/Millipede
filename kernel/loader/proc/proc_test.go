@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/millipede/millipede/kernel/integrity"
-	"github.com/millipede/millipede/kernel/loader"
+	"github.com/witchsnk/millipede/kernel/integrity"
+	"github.com/witchsnk/millipede/kernel/loader"
 )
 
 // 集成测试：用真实子进程跑 proc 后端。

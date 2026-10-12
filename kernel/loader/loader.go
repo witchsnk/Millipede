@@ -9,7 +9,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/millipede/millipede/sdk/contract"
+	"github.com/witchsnk/millipede/sdk/contract"
 )
 
 // BackendKind 后端类型。

@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/millipede/millipede/kernel/integrity"
-	"github.com/millipede/millipede/kernel/loader"
-	"github.com/millipede/millipede/kernel/quota"
+	"github.com/witchsnk/millipede/kernel/integrity"
+	"github.com/witchsnk/millipede/kernel/loader"
+	"github.com/witchsnk/millipede/kernel/quota"
 )
 
 // 约束 C1：配额必须在**真实调用路径**上生效，而不只是 quota 包自己的单测。

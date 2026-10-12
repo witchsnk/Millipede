@@ -5,7 +5,7 @@ package quota
 import (
 	"testing"
 
-	"github.com/millipede/millipede/sdk/contract"
+	"github.com/witchsnk/millipede/sdk/contract"
 )
 
 func TestEncodeParseEnvRoundTrip(t *testing.T) {

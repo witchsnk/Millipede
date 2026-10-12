@@ -11,11 +11,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/millipede/millipede/kernel/lifecycle"
-	"github.com/millipede/millipede/kernel/loader"
-	"github.com/millipede/millipede/kernel/quota"
-	"github.com/millipede/millipede/kernel/safecall"
-	"github.com/millipede/millipede/sdk/host"
+	"github.com/witchsnk/millipede/kernel/lifecycle"
+	"github.com/witchsnk/millipede/kernel/loader"
+	"github.com/witchsnk/millipede/kernel/quota"
+	"github.com/witchsnk/millipede/kernel/safecall"
+	"github.com/witchsnk/millipede/sdk/host"
 )
 
 // Plugin 是一个内置插件的注册单元。
